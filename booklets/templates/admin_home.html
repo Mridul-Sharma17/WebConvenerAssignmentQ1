@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  .search-filter {
+    flex: 0 0 25%; 
+    margin-right: 10px; 
+  }
+
+  .search-input {
+    flex: 1; 
+  }
+</style>
+
+<div class="container">
+  <h2 class="mb-4">Welcome Admin</h2>
+
+  <form class="mb-4 d-flex">
+    <select id="searchFilter" class="form-select search-filter" onchange="updatePlaceholder()">
+      <option value="title">Name</option>
+      <option value="upload_date">Publish Date</option>
+    </select>
+    <input
+      type="text"
+      id="searchInput"
+      class="form-control search-input"
+      placeholder="Search by name..."
+      oninput="filterBooklets()"
+    />
+    <button type="button" class="btn btn-primary" id="searchButton" onclick="filterBooklets()">
+      Search
+    </button>
+  </form>
+
+  <a href="{% url 'add_booklet' %}" class="btn btn-primary mb-4">Add New Booklet</a>
+
+  <ul class="list-group" id="bookletContainer">
+    {% for booklet in booklets %}
+    <li class="list-group-item d-flex justify-content-between align-items-center booklet-item" data-title="{{ booklet.title }}" data-upload_date="{{ booklet.upload_date|date:"F d, Y" }}">
+      <div>
+        <a href="{{ booklet.pdf.url }}" class="text-decoration-none">
+          <h5 class="mb-0 card-title">{{ booklet.title }}</h5>
+        </a>
+        <p class="mb-0 card-text">Uploaded on: {{ booklet.upload_date|date:"F d, Y" }}</p>
+      </div>
+      <div>
+        <a href="{% url 'delete_booklet' booklet.id %}" class="btn btn-danger btn-sm ms-2">Delete</a>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+
+<script>
+  function updatePlaceholder() {
+    var filter = document.getElementById('searchFilter').value;
+    var searchInput = document.getElementById('searchInput');
+    if (filter === 'title') {
+      searchInput.placeholder = 'Search by name...';
+    } else if (filter === 'upload_date') {
+      searchInput.placeholder = 'Search by publish date...';
+    }
+  }
+
+  function filterBooklets() {
+    var input = document.getElementById('searchInput').value.toLowerCase();
+    var filter = document.getElementById('searchFilter').value;
+    var booklets = document.querySelectorAll('.booklet-item');
+
+    booklets.forEach(function(booklet) {
+      var value = booklet.getAttribute('data-' + filter).toLowerCase();
+
+      if (value.includes(input)) {
+        booklet.style.display = 'flex'; 
+      } else {
+        booklet.style.display = 'none';
+      }
+    });
+  }
+</script>
+{% endblock %}
